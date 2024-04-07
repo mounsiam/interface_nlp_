@@ -9,6 +9,16 @@ from .models import Complaint
 from django.http import JsonResponse
 import speech_recognition as sr
 
+
+import re
+import string
+import nltk
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+from nltk.stem import PorterStemmer
+from nltk.stem import WordNetLemmatizer
+
+
 class AudioTranscription(models.Model):
     text = models.TextField()
 
@@ -55,3 +65,49 @@ def process_complaint_audio(request):
             return JsonResponse({'status': 'error', 'message': 'Audio file not found'})
     else:
         return JsonResponse({'status': 'error', 'message': 'Method not allowed'})
+
+
+
+
+# Download necessary resources
+nltk.download('punkt')
+nltk.download('stopwords')
+nltk.download('wordnet')
+
+
+def preprocess_text(text):
+    # Step 1: Lowercasing
+    text = text.lower()
+
+    # Step 2: Remove Punctuation
+    text = re.sub(r'[^\w\s]', '', text)
+
+    # Step 3: Removing Stopwords
+
+    text = re.sub(r'\s+', ' ', text)
+
+    stop_words = set(stopwords.words('english'))
+    tokens = word_tokenize(text)
+    text = ' '.join([word for word in tokens if word not in stop_words])
+
+    # Step 4: Stemming or Lemmatization
+    # Initialize stemmer and lemmatizer
+    stemmer = PorterStemmer()
+    lemmatizer = WordNetLemmatizer()
+
+    # Stem each word in the text
+    text = ' '.join([stemmer.stem(word) for word in tokens])
+
+    # Step 5: Handling Special Characters
+    text = re.sub(r'[^\w\s]', '', text)
+
+    # Step 6: Remove extra white spaces
+    text = re.sub(r'\s+', ' ', text)
+
+    return text.strip()
+
+
+# Example usage:
+user_input = "This is an example sentence with punctuation, stopwords, and mixed case words."
+cleaned_text = preprocess_text(user_input)
+print("Cleaned text:", cleaned_text)
