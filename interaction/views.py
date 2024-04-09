@@ -19,7 +19,7 @@ from nltk.stem import PorterStemmer
 from nltk.stem import WordNetLemmatizer
 
 
-class AudioTranscription(models.Model):
+class interactoin_complaint(models.Model):
     text = models.TextField()
 
 
@@ -55,7 +55,7 @@ def process_complaint_audio(request):
             try:
                 transcription = recognizer.recognize_google(audio_data)
                 # Save text transcription to database
-                AudioTranscription.objects.create(text=transcription)
+                interactoin_complaint.objects.create(text=transcription)
                 return JsonResponse({'status': 'success', 'message': 'Audio transcription saved successfully'})
             except sr.UnknownValueError:
                 return JsonResponse({'status': 'error', 'message': 'Could not understand audio'})
